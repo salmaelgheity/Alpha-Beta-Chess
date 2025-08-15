@@ -1,0 +1,40 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.mypy_cache/
+.pytest_cache/
+.cache/
+
+# Virtual environments
+.env
+.venv/
+env/
+venv/
+
+# Distribution / packaging
+build/
+dist/
+.eggs/
+*.egg-info/
+pip-wheel-metadata/
+
+# Logs & coverage
+*.log
+.coverage
+coverage.xml
+htmlcov/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*.orig
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Misc
+*.bak
