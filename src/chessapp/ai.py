@@ -208,6 +208,124 @@ class AggressiveAlphaBetaAI:
         return sorted(moves, key=move_score, reverse=True)
 
 
+class SimpleAlphaBetaAI:
+    """Simple Alpha-Beta AI without advanced optimizations."""
+    
+    def __init__(self, depth: int = 3, time_limit: float = 2.0):
+        self.max_depth = depth
+        self.time_limit = time_limit
+        self.nodes_evaluated = 0
+        self.start_time = 0.0
+        
+        # Basic piece values
+        self.piece_values = {
+            'P': 100, 'N': 300, 'B': 300, 'R': 500, 'Q': 900, 'K': 10000
+        }
+
+    def get_move(self, board: Board) -> Move | None:
+        """Get the best move using simple Alpha-Beta pruning."""
+        self.nodes_evaluated = 0
+        self.start_time = time.time()
+        
+        legal_moves = board.generate_legal_moves()
+        if not legal_moves:
+            return None
+            
+        if len(legal_moves) == 1:
+            return legal_moves[0]
+        
+        best_move = legal_moves[0]
+        best_score = float('-inf')
+        
+        alpha = float('-inf')
+        beta = float('inf')
+        
+        # No move ordering - just use moves as generated
+        for move in legal_moves:
+            if time.time() - self.start_time > self.time_limit:
+                break
+                
+            clone = board.clone()
+            clone._apply_move(move)
+            
+            score = -self.alpha_beta(clone, self.max_depth - 1, -beta, -alpha, False)
+            
+            if score > best_score:
+                best_score = score
+                best_move = move
+                
+            alpha = max(alpha, score)
+                
+        return best_move
+
+    def alpha_beta(self, board: Board, depth: int, alpha: float, beta: float, 
+                   maximizing_player: bool) -> float:
+        """Basic Alpha-Beta pruning algorithm."""
+        self.nodes_evaluated += 1
+        
+        if time.time() - self.start_time > self.time_limit:
+            return 0
+        
+        # Check for game end
+        result = board.result()
+        if result is not None:
+            if result == "1-0":  # White wins
+                return 1000 if maximizing_player else -1000
+            elif result == "0-1":  # Black wins
+                return -1000 if maximizing_player else 1000
+            else:  # Draw
+                return 0
+        
+        if depth <= 0:
+            return self.evaluate_position(board)
+        
+        moves = board.generate_legal_moves()
+        if not moves:
+            if board.is_in_check(board.turn):
+                return -1000  # Checkmate
+            return 0  # Stalemate
+        
+        # No move ordering - just use moves as generated
+        if maximizing_player:
+            max_eval = float('-inf')
+            for move in moves:
+                clone = board.clone()
+                clone._apply_move(move)
+                eval_score = self.alpha_beta(clone, depth - 1, alpha, beta, False)
+                max_eval = max(max_eval, eval_score)
+                alpha = max(alpha, eval_score)
+                if beta <= alpha:
+                    break  # Alpha-Beta pruning
+            return max_eval
+        else:
+            min_eval = float('inf')
+            for move in moves:
+                clone = board.clone()
+                clone._apply_move(move)
+                eval_score = self.alpha_beta(clone, depth - 1, alpha, beta, True)
+                min_eval = min(min_eval, eval_score)
+                beta = min(beta, eval_score)
+                if beta <= alpha:
+                    break  # Alpha-Beta pruning
+            return min_eval
+
+    def evaluate_position(self, board: Board) -> float:
+        """Simple material-based evaluation."""
+        score = 0
+        
+        for r in range(8):
+            for c in range(8):
+                piece = board.board[r][c]
+                if piece:
+                    value = self.piece_values[piece[1]]
+                    if piece[0] == WHITE:
+                        score += value
+                    else:
+                        score -= value
+        
+        return score if board.turn == WHITE else -score
+
+
 # Convenience function
 def alpha_beta_ai_move(board: Board, depth: int = 4) -> Move | None:
     """Get move from aggressive Alpha-Beta AI."""

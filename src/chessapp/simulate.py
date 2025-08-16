@@ -2,7 +2,7 @@ import time
 import random
 from typing import Dict, List, Callable, Tuple, Optional
 from .engine import Board, Move
-from .ai import random_ai_move, AggressiveAlphaBetaAI
+from .ai import random_ai_move, AggressiveAlphaBetaAI, SimpleAlphaBetaAI
 
 
 class GameSimulator:
@@ -206,7 +206,7 @@ def run_milestone2_experiments():
     print("-" * 60)
     
     def simple_alpha_beta(board: Board) -> Move | None:
-        ai = AggressiveAlphaBetaAI(depth=3, time_limit=2.0)
+        ai = SimpleAlphaBetaAI(depth=3, time_limit=2.0)
         return ai.get_move(board)
     
     def optimized_alpha_beta(board: Board) -> Move | None:
@@ -217,9 +217,9 @@ def run_milestone2_experiments():
     exp2_results = simulator.simulate_match(
         white_ai=simple_alpha_beta,
         black_ai=optimized_alpha_beta,
-        num_games=15,
-        white_name="Simple Alpha-Beta (depth=3)",
-        black_name="Optimized Alpha-Beta (depth=4)",
+        num_games=12,
+        white_name="Simple Alpha-Beta (depth=3, no optimizations)",
+        black_name="Optimized Alpha-Beta (depth=4, with optimizations)",
         verbose=False
     )
     
@@ -233,7 +233,7 @@ def run_milestone2_experiments():
     print("Testing AI performance on starting position:")
     
     # Simple Alpha-Beta
-    simple_ai = AggressiveAlphaBetaAI(depth=3, time_limit=3.0)
+    simple_ai = SimpleAlphaBetaAI(depth=3, time_limit=3.0)
     start_time = time.time()
     simple_move = simple_ai.get_move(test_board)
     simple_time = time.time() - start_time
@@ -253,8 +253,9 @@ def run_milestone2_experiments():
           f"({opt_nodes/opt_time:.0f} nodes/sec)")
     
     if simple_nodes > 0:
-        pruning_efficiency = (1 - opt_nodes/simple_nodes) * 100
-        print(f"Move ordering efficiency: {pruning_efficiency:.1f}% fewer nodes evaluated")
+        efficiency_ratio = opt_nodes / simple_nodes
+        print(f"Node efficiency: Optimized searches {efficiency_ratio:.1f}x as many nodes but at greater depth")
+        print(f"Despite deeper search, optimized AI uses move ordering and better evaluation")
     
     # Summary Report
     print("\n\nMILESTONE 2 SUMMARY REPORT")
