@@ -1,7 +1,7 @@
 import pygame
 from typing import Optional, Tuple
 from .engine import Board, Move
-from .ai import random_ai_move, AlphaBetaAI
+from .ai import random_ai_move, AggressiveAlphaBetaAI
 
 SQUARE_SIZE = 80
 BOARD_SIZE = SQUARE_SIZE * 8
@@ -67,7 +67,7 @@ def main():
     running = True
     
     # Create Alpha-Beta AI
-    ai_engine = AlphaBetaAI(depth=4, use_move_ordering=True, time_limit=3.0)
+    ai_engine = AggressiveAlphaBetaAI(depth=4, time_limit=3.0)
 
     while running:
         for event in pygame.event.get():
