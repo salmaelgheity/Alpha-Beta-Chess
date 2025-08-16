@@ -1,7 +1,7 @@
 import pygame
 from typing import Optional, Tuple
 from .engine import Board, Move
-from .ai import random_ai_move
+from .ai import random_ai_move, AlphaBetaAI
 
 SQUARE_SIZE = 80
 BOARD_SIZE = SQUARE_SIZE * 8
@@ -59,12 +59,15 @@ def draw_board(
 def main():
     pygame.init()
     screen = pygame.display.set_mode((BOARD_SIZE, BOARD_SIZE))
-    pygame.display.set_caption("Chess (Human vs Random AI)")
+    pygame.display.set_caption("Chess (Human vs Alpha-Beta AI)")
     clock = pygame.time.Clock()
     board = Board()
 
     selected: Optional[Tuple[int, int]] = None
     running = True
+    
+    # Create Alpha-Beta AI
+    ai_engine = AlphaBetaAI(depth=4, use_move_ordering=True, time_limit=3.0)
 
     while running:
         for event in pygame.event.get():
@@ -92,9 +95,10 @@ def main():
                     if move_made:
                         # after human move, AI moves if game not over
                         if not board.result():
-                            ai_move = random_ai_move(board)
+                            ai_move = ai_engine.get_move(board)
                             if ai_move:
                                 board.make_move(ai_move)
+                                print(f"AI played: {ai_move} (evaluated {ai_engine.nodes_evaluated:,} nodes)")
         screen.fill((0, 0, 0))
         legal_moves = list(board.generate_legal_moves())
         draw_board(screen, board, selected, legal_moves)
